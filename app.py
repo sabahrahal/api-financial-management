@@ -1,15 +1,17 @@
+from sqlalchemy_utils import database_exists, create_database
 from src import create_app, db
 
 app = create_app()
 
-tables_created = False
+# Crear tablas solo si no existen
+with app.app_context():
+    if not database_exists(app.config["SQLALCHEMY_DATABASE_URI"]):
+        create_database(app.config["SQLALCHEMY_DATABASE_URI"])
+    else:
+        print("La base de datos ya existe. No se crearán tablas nuevamente.")
 
-@app.before_request
-def create_tables():
-    global tables_created
-    if not tables_created:
-        db.create_all()
-        tables_created = True
+    # Crear tablas solo si no están creadas
+    db.create_all()
 
 if __name__ == "__main__":
     app.run(debug=True)
